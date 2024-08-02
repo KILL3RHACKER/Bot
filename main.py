@@ -183,7 +183,7 @@ async def process_callback(callback_query: types.CallbackQuery):
             f.write(f"{user_id}\n")
         save_user(username, user_id)
         save_approval_date(user_id)
-        await bot.send_message(user_id, "Ваша заявка принята!")
+        await bot.send_message(user_id, "Ваша заявка принята! Введите /start, чтобы продолжить")
         await bot.edit_message_text("Заявка принята", chat_id=ADMIN_CHAT_ID, message_id=message_id)
     elif action == 'reject':
         with open('False.txt', 'a') as f:
