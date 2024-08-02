@@ -114,6 +114,15 @@ def get_username_by_id(user_id):
     except FileNotFoundError:
         return None
 
+def list_usernames():
+    try:
+        with open('User.txt', 'r') as f:
+            lines = f.readlines()
+        usernames = [line.strip().split()[0] for line in lines]
+        return "\n".join(usernames)
+    except FileNotFoundError:
+        return "No users found."
+
 # Начало диалога
 @dp.message_handler(commands='start')
 async def cmd_start(message: types.Message):
@@ -242,6 +251,13 @@ async def cmd_support(message: types.Message):
 # Админ панель
 @dp.message_handler(lambda message: message.text == 'Админ' and message.from_user.id == int(ADMIN_CHAT_ID))
 async def cmd_admin(message: types.Message):
+    balance_button = KeyboardButton('Изменить баланс')
+    list_users_button = KeyboardButton('Список пользователей')
+    markup = ReplyKeyboardMarkup(resize_keyboard=True).add(balance_button, list_users_button)
+    await message.answer("Админ панель", reply_markup=markup)
+
+@dp.message_handler(lambda message: message.text == 'Изменить баланс' and message.from_user.id == int(ADMIN_CHAT_ID))
+async def cmd_change_balance(message: types.Message):
     await Form.change_balance.set()
     await message.answer("Введите данные для изменения баланса в формате: username новая_сумма")
 
@@ -265,6 +281,11 @@ async def process_change_balance(message: types.Message, state: FSMContext):
         await message.answer(f"Произошла ошибка: {str(e)}")
     finally:
         await state.finish()
+
+@dp.message_handler(lambda message: message.text == 'Список пользователей' and message.from_user.id == int(ADMIN_CHAT_ID))
+async def cmd_list_users(message: types.Message):
+    usernames = list_usernames()
+    await message.answer(f"Список пользователей:\n{usernames}")
 
 def get_user_id_by_username(username):
     try:
